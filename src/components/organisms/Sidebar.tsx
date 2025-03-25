@@ -28,25 +28,25 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle }) => {
             
             <ul className="sidebar-menu">
                 <li>
-                    <Link to="/personal-management" className="active">
+                    <Link to="/companymanager-personal-management" className="active">
                         <i className="fas fa-users"></i>
                         <span className="menu-text">Personel Yönetimi</span>
                     </Link>
                 </li>
                 <li>
-                    <Link to="/leave-management">
+                    <Link to="/companymanager-leaves">
                         <i className="fas fa-calendar-alt"></i>
                         <span className="menu-text">İzin Yönetimi</span>
                     </Link>
                 </li>
                 <li>
-                    <Link to="/shift-management">
+                    <Link to="/companymanager-shifts">
                         <i className="fas fa-clock"></i>
                         <span className="menu-text">Vardiya Yönetimi</span>
                     </Link>
                 </li>
                 <li>
-                    <Link to="/asset-management">
+                    <Link to="/companymanager-assets">
                         <i className="fas fa-box"></i>
                         <span className="menu-text">Zimmet Yönetimi</span>
                     </Link>
@@ -80,15 +80,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle }) => {
                     </Link>
                 </li>
                 <li>
-                    <Link to="/profile-settings">
+                    <Link to="/profile">
                         <i className="fas fa-user-cog"></i>
                         <span className="menu-text">Profil Ayarları</span>
                     </Link>
                 </li>
                 <li>
-                    <Link to="/settings">
+                    <Link to="/notifications">
                         <i className="fas fa-cog"></i>
-                        <span className="menu-text">Ayarlar</span>
+                        <span className="menu-text">Bildirimler</span>
                     </Link>
                 </li>
             </ul>

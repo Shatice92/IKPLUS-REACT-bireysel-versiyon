@@ -1,0 +1,86 @@
+.header-subtitle {
+    font-size: 18px;
+    color: #666;
+    margin-bottom: 25px;
+    font-weight: 500;
+}
+
+.leave-types-section {
+    margin-top: 30px;
+}
+
+.leave-type-list ul {
+    list-style-type: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+.leave-type-item {
+    background-color: #fff;
+    padding: 12px 18px;
+    margin: 10px 0;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    font-size: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.leave-type-item:hover {
+    transform: translateX(10px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.add-leave-type {
+    display: flex;
+    margin-top: 20px;
+    gap: 12px;
+    align-items: center;
+}
+
+.add-leave-type input {
+    padding: 12px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 260px;
+    transition: border-color 0.3s ease;
+}
+
+.add-leave-type input:focus {
+    border-color: #28a745;
+    outline: none;
+}
+
+.add-leave-type button {
+    padding: 12px 22px;
+    font-size: 16px;
+    color: #fff;
+    background-color: #28a745;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.add-leave-type button:hover {
+    background-color: #218838;
+}
+
+.error-message {
+    margin-top: 15px;
+    color: #d9534f;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.section-title{
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-dark);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}

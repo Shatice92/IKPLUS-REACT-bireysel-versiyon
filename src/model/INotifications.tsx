@@ -1,6 +1,6 @@
 export interface INotifications {
     id: number;
-    employeeId: number;
+    user_id: number;
     title: string;
     notification: string;
     createdAt: string;

@@ -104,84 +104,32 @@ body {
   background: rgba(255, 255, 255, 0.5);
 }
 
-/* === BUTON === */
-.Message-button {
-  background-color: rgba(255, 255, 255, 0.2);
-  color: #fff;
-  padding: 8px 12px;
-  font-size: 13px;
-  border-radius: 6px;
-  cursor: pointer;
-  border: none;
-  outline: none;
-  transition: background 0.2s ease-in-out;
+.Message--unread {
+  background-color: #ff416c; /* Kırmızı */
+  color: white;
 }
 
-.Message-button:hover {
-  background-color: rgba(255, 255, 255, 0.4);
-}
-
-.Message-button:active {
-  background-color: rgba(255, 255, 255, 0.5);
-}
-
-/* === İTALİK YAZI === */
-.u-italic {
-  font-style: italic;
-}
-
-
-/* === RESPOSİVE DÜZEN === */
-@media (max-width: 600px) {
-  .Message {
-    width: 90%; /* Daha esnek bir genişlik */
-    padding: 12px; /* Küçük ekranlar için padding azaltılabilir */
-  }
-
-  .Message-icon {
-    width: 40px;
-    height: 40px;
-  }
-
-  .Message-body h3 {
-    font-size: 14px; /* Küçük ekranlarda başlık daha küçük olabilir */
-  }
-
-  .Message-body p {
-    font-size: 12px; /* Küçük ekranlarda metin boyutunu azaltabilirsin */
-  }
-}
-
-
-
-.Message-actions {
-  margin-top: 10px;
-  display: flex;
-  gap: 10px;
+.Message--read {
+  background-color: #28a745; /* Yeşil */
+  color: white;
 }
 
 .btn-read {
-  background-color: #4CAF50;
+  background-color: #28a745;
   color: white;
   padding: 5px 10px;
   border: none;
   cursor: pointer;
-  border-radius: 4px;
-}
-
-.btn-read:hover {
-  background-color: #45a049;
 }
 
 .btn-delete {
-  background-color: #f44336;
+  background-color: #dc3545;
   color: white;
   padding: 5px 10px;
   border: none;
   cursor: pointer;
-  border-radius: 4px;
 }
 
-.btn-delete:hover {
-  background-color: #d32f2f;
+.Message-actions button:hover {
+  opacity: 0.8;
 }

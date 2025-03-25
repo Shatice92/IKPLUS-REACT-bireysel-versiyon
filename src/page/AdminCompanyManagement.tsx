@@ -1,236 +1,201 @@
 import React, { useEffect, useState } from "react";
-import { Table, Button, Switch, Select, Menu } from "antd";
+import { Table, Button, Modal, Input, Form } from "antd";
 import { useNavigate } from "react-router";
-import { Modal } from "antd";
+import Swal from "sweetalert2";
 import './AdminCompanyManagement.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import AdminSidebar from "../components/organisms/AdminSideBar";
- 
-interface SidebarProps {
-    collapsed: boolean;
-    onToggle: () => void;
-}
- 
-interface Company {
-    id: number;
-    name: string;
-    registrationDate: string;
-    isApproved: boolean;
-    emailVerified: boolean;
-    membershipPlan: string;
-    description: string;
-    address: string;
-    phone: string;
-    email: string;
-    website: string;
-    logo: string;
-    sector: string;
-    taxNumber: string;
-    taxOffice: string;
-}
+import { ICompany, CompanyStatus, CompanyStatusLabels } from "../model/ICompany";
 
-
-
-
-const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle }) => {
-    return (
-        <div className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
-            <div className="sidebar-header">
-                <div className="logo-container">
-                    {collapsed ? (
-                        <img src="/assets/logo1.png" alt="IK Plus Logo" className="sidebar-logo" />
-                    ) : (
-                        <img src="/assets/logo2.png" alt="IK Plus Logo" className="sidebar-logo" />
-                    )}
-                </div>
-                <button className="sidebar-toggle" onClick={onToggle}>
-                    <i className="fas fa-chevron-left"></i>
-                </button>
-            </div>
- 
-            <ul className="sidebar-menu">
-                
-               
-                <li className="menu-label">Ana Menü</li>
-                <li>
-                    <a href="#">
-                        <i className="fas fa-chart-line"></i>
-                        <span>Şirket Bilgileri</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#">
-                        <i className="fas fa-chart-line"></i>
-                        <span>Şirket Belgeleri</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#">
-                        <i className="fas fa-chart-line"></i>
-                        <span>Üyelik ve Faturalandırma</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#">
-                        <i className="fas fa-user-cog"></i>
-                        <span>Profil Ayarları</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#">
-                        <i className="fas fa-cog"></i>
-                        <span>Ayarlar</span>
-                    </a>
-                </li>
-            </ul>
- 
-            <div className="sidebar-footer">
-                IK Plus v1.0.0
-            </div>
-        </div>
-    );
-};
- 
-
-
-
- 
-const CompanyManagement: React.FC = () => {
-    const [companies, setCompanies] = useState<Company[]>([]);
+const AdminCompanyManagement: React.FC = () => {
+    const [companies, setCompanies] = useState<ICompany[]>([]);
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [isModalVisible, setIsModalVisible] = useState(false);
-    const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
-    const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
+    const [currentCompany, setCurrentCompany] = useState<ICompany | null>(null);
+    const [updatedName, setUpdatedName] = useState("");
+    const [updatedEmailDomain, setUpdatedEmailDomain] = useState("");
     const navigate = useNavigate();
-    const [errorMessage, setErrorMessage] = useState<string>("");
-
 
     useEffect(() => {
-        fetchAssets();
-      }, []);
-   
-      const fetchAssets = () => {
+        fetchCompanies();
+    }, []);
+
+    const fetchCompanies = () => {
         const token = sessionStorage.getItem("token");
         if (!token) {
-          setErrorMessage("Geçersiz veya eksik token!");
-          return;
+            setErrorMessage("Geçersiz veya eksik token!");
+            return;
         }
-   
-        fetch("http://localhost:9090/v1/dev/admin/companies/getAll", {
-          method: "GET",
-          headers: { Authorization: `Bearer ${token}` },
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            if (data.success) setCompanies(data.data);
-            else setErrorMessage(data.message || "API Response Error");
-          })
-          .catch((error) => setErrorMessage(error.message));
-      };
 
-      
-   
-     const handleApprove = (companyId: number) => {
-        fetch(`http://localhost:9090/v1/dev/admin/companies/approve/${companyId}`, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${companyId}`,
-            },
+        fetch("http://localhost:9090/v1/dev/admin/companies/list", {
+            method: "GET",
+            headers: { Authorization: `Bearer ${token}` },
         })
-        .then((res) => res.json())
-        .then((data) => {
-            if (data.code === 200) {
-                setCompanies((prevCompanies) =>
-                    prevCompanies.map((company) =>
-                        company.id === companyId ? { ...company, isApproved: !company.isApproved } : company
-                    )
-                );
-                alert("Şirket onay durumu güncellendi!");
-            } else {
-                console.error("Şirket onaylanırken hata oluştu");
-            }
-        })
-        .catch((err) => console.error("Güncelleme sırasında hata:", err));
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.success) setCompanies(data.data);
+                else setErrorMessage(data.message || "API Response Error");
+            })
+            .catch((error) => setErrorMessage(error.message));
     };
 
+    const handleApprove = (id: number) => {
+        const token = sessionStorage.getItem("token");
+        if (!token) return;
 
-    // ❌ Şirketi reddetme fonksiyonu (Backend ile bağlantılı)
-    const handleReject = (companyId: number) => {
-        fetch(`http://localhost:9090/v1/dev/admin/companies/reject/${companyId}`, {
+        fetch(`http://localhost:9090/v1/dev/admin/companies/approve/${id}`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${companyId}`,
+                Authorization: `Bearer ${token}`,
             },
         })
-        .then((res) => res.json())
-        .then((data) => {
-            if (data.code === 200) {
-                setCompanies((prevCompanies) => prevCompanies.filter((company) => company.id !== companyId));
-                alert("Şirket reddedildi!");
-            } else {
-                console.error("Şirket reddedilirken hata oluştu");
-            }
-        })
-        .catch((err) => console.error("Reddetme sırasında hata:", err));
+            .then((res) => res.json())
+            .then((data) => {
+                if (data.code === 200) {
+                    setCompanies((prevCompanies) =>
+                        prevCompanies.map((company) =>
+                            company.id === id ? { ...company, status: CompanyStatus.APPROVED } : company
+                        )
+                    );
+                    Swal.fire({
+                        title: "Başarılı",
+                        text: "Şirket onay durumu güncellendi!",
+                        icon: "success",
+                        confirmButtonText: "Tamam",
+                    });
+                } else {
+                    Swal.fire({
+                        title: "Hata",
+                        text: "Şirket onaylanırken bir hata oluştu.",
+                        icon: "error",
+                        confirmButtonText: "Tamam",
+                    });
+                }
+            })
+            .catch((err) => {
+                Swal.fire({
+                    title: "Hata",
+                    text: "Bir hata oluştu. Lütfen tekrar deneyin.",
+                    icon: "error",
+                    confirmButtonText: "Tamam",
+                });
+            });
     };
 
-      
+    const handleReject = (id: number) => {
+        const token = sessionStorage.getItem("token");
+        if (!token) return;
 
-   
-
-    // **Bir Şirketi Güncelleme API Çağrısı**
-    const handleUpdateCompany = (companyId: number, updatedCompanyData: Partial<Company>) => {
-        fetch(`http://localhost:9090/v1/dev/admin/companies/update/${companyId}`, {
+        fetch(`http://localhost:9090/v1/dev/admin/companies/reject/${id}`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${companyId}`,
+                Authorization: `Bearer ${token}`,
+            },
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                if (data.code === 200) {
+                    setCompanies((prevCompanies) => prevCompanies.filter((company) => company.id !== id));
+                    Swal.fire({
+                        title: "Başarılı",
+                        text: "Şirket reddedildi!",
+                        icon: "success",
+                        confirmButtonText: "Tamam",
+                    });
+                } else {
+                    Swal.fire({
+                        title: "Hata",
+                        text: "Şirket reddedilirken bir hata oluştu.",
+                        icon: "error",
+                        confirmButtonText: "Tamam",
+                    });
+                }
+            })
+            .catch((err) => {
+                Swal.fire({
+                    title: "Hata",
+                    text: "Bir hata oluştu. Lütfen tekrar deneyin.",
+                    icon: "error",
+                    confirmButtonText: "Tamam",
+                });
+            });
+    };
+
+    const handleUpdateCompany = () => {
+        const token = sessionStorage.getItem("token");
+        if (!token || !currentCompany) return;
+
+        const updatedCompanyData = {
+            name: updatedName,
+            emailDomain: updatedEmailDomain,
+        };
+
+        fetch(`http://localhost:9090/v1/dev/admin/companies/update/${currentCompany.id}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify(updatedCompanyData),
         })
-        .then((res) => res.json())
-        .then((data) => {
-            if (data.code === 200) {
-                setCompanies(companies.map(company =>
-                    company.id === companyId ? { ...company, ...updatedCompanyData } : company
-                ));
-                alert("Şirket başarıyla güncellendi!");
-            } else {
-                console.error("Şirket güncellenirken hata oluştu");
-            }
-        })
-        .catch((err) => console.error("Güncelleme sırasında hata:", err));
+            .then((res) => res.json())
+            .then((data) => {
+                if (data.code === 200) {
+                    setCompanies((prevCompanies) =>
+                        prevCompanies.map((company) =>
+                            company.id === currentCompany.id ? { ...company, ...updatedCompanyData } : company
+                        )
+                    );
+                    setIsModalVisible(false);
+                    Swal.fire({
+                        title: "Başarılı",
+                        text: "Şirket başarıyla güncellendi!",
+                        icon: "success",
+                        confirmButtonText: "Tamam",
+                    });
+                } else {
+                    Swal.fire({
+                        title: "Hata",
+                        text: "Şirket güncellenirken bir hata oluştu.",
+                        icon: "error",
+                        confirmButtonText: "Tamam",
+                    });
+                }
+            })
+            .catch((err) => {
+                Swal.fire({
+                    title: "Hata",
+                    text: "Bir hata oluştu. Lütfen tekrar deneyin.",
+                    icon: "error",
+                    confirmButtonText: "Tamam",
+                });
+            });
     };
 
-   
-    
-  
-    
+    const handleEditCompany = (company: ICompany) => {
+        setCurrentCompany(company);
+        setUpdatedName(company.name);
+        setUpdatedEmailDomain(company.emailDomain);
+        setIsModalVisible(true);
+    };
 
- 
     const handleLogout = () => {
         sessionStorage.removeItem("token");
         navigate("/login");
     };
- 
+
     const toggleSidebar = () => {
         setSidebarCollapsed(!sidebarCollapsed);
     };
- 
+
     const columns = [
         { title: "ID", dataIndex: "id", key: "id" },
         { title: "Şirket Adı", dataIndex: "name", key: "name" },
-        { title: "Kayıt Tarihi", dataIndex: "registrationDate", key: "registrationDate" },
-        { title: "Adres", dataIndex: "address", key: "address" },
-        { title: "Telefon", dataIndex: "phone", key: "phone" },
-        { title: "E-Posta", dataIndex: "email", key: "email" },
-        { title: "Web Sitesi", dataIndex: "website", key: "website" },
-        { title: "Sektör", dataIndex: "sector", key: "sector" },
-        { title: "Vergi No", dataIndex: "taxNumber", key: "taxNumber" },
-        { title: "Vergi Dairesi", dataIndex: "taxOffice", key: "taxOffice" },
+        { title: "E-Posta Domaini", dataIndex: "emailDomain", key: "emailDomain" },
         {
             title: "Logo",
             dataIndex: "logo",
@@ -238,52 +203,56 @@ const CompanyManagement: React.FC = () => {
             render: (logo: string) => <img src={logo} alt="Şirket Logosu" width={50} height={50} />
         },
         {
-            title: "Onay Durumu",
-            dataIndex: "isApproved",
-            key: "isApproved",
-            render: (_: any, record: Company) => (
-                <Switch checked={record.isApproved} onChange={() => setCompanies(companies.map(company => company.id === record.id ? { ...company, isApproved: !company.isApproved } : company))} />
-            ),
+            title: "Onay Durumu", dataIndex: "status", key: "status",
+            render: (status: CompanyStatus) => (
+                <span>{CompanyStatusLabels[status]}</span>
+            )
         },
+      
         {
-            title: "Üyelik Planı",
-            dataIndex: "membershipPlan",
-            key: "membershipPlan",
-            render: (_: any, record: Company) => (
-                <Select value={record.membershipPlan} onChange={(value) => setCompanies(companies.map(company => company.id === record.id ? { ...company, membershipPlan: value } : company))}>
-                    <Select.Option value="Aylık">Aylık</Select.Option>
-                    <Select.Option value="Yıllık">Yıllık</Select.Option>
-                </Select>
-            ),
-        },
-        {
-            title: "İşlemler",
-            render: (_: any, record: Company) => (
-                <Button onClick={() => setCompanies(companies.filter(company => company.id !== record.id))} danger>Sil</Button>
-            ),
+            title: "İşlemler", render: (_: any, record: ICompany) => (
+                <div>
+                    <Button onClick={() => handleApprove(record.id)} type="primary" style={{ marginRight: 10 }}>Onayla</Button>
+                    <Button onClick={() => handleEditCompany(record)} type="default" style={{ marginRight: 10 }}>Güncelle</Button>
+                    <Button onClick={() => handleReject(record.id)} danger>Reddet</Button>
+                </div>
+            )
         },
     ];
- 
+
     return (
         <div className="deneme-container">
             <AdminSidebar collapsed={sidebarCollapsed} onToggle={toggleSidebar} />
-        <div className="personal-management-container">
             <main className={`main-content ${sidebarCollapsed ? 'expanded' : ''}`}>
-                <section className="bg-light py-5 py-md-7 py-xl-10">
-                    <div className="container">
-                        <div className="row justify-content-between align-items-center mb-4" id="header">
-                           
-                        </div>
-                        <h1 className="text-center mt-5">Şirket Yönetimi</h1>
-                        <Table columns={columns} dataSource={companies} rowKey="id" className="mt-4" />
-                    </div>
-                </section>
+                <h1>Şirket Yönetimi</h1>
+                <p className="header-subtitle">Başvuru Yapmış Şirketleri listeleyip, onaylayın veya reddedin!</p>
+                <Table columns={columns} dataSource={companies} rowKey="id" className="mt-4" />
             </main>
-        </div>
+
+            {/* Modal for company update */}
+            <Modal
+                title="Şirket Güncelle"
+                visible={isModalVisible}
+                onOk={handleUpdateCompany}
+                onCancel={() => setIsModalVisible(false)}
+            >
+                <Form layout="vertical">
+                    <Form.Item label="Şirket Adı">
+                        <Input
+                            value={updatedName}
+                            onChange={(e) => setUpdatedName(e.target.value)}
+                        />
+                    </Form.Item>
+                    <Form.Item label="E-Posta Domaini">
+                        <Input
+                            value={updatedEmailDomain}
+                            onChange={(e) => setUpdatedEmailDomain(e.target.value)}
+                        />
+                    </Form.Item>
+                </Form>
+            </Modal>
         </div>
     );
 };
- 
-export default CompanyManagement;
- 
- 
+
+export default AdminCompanyManagement;

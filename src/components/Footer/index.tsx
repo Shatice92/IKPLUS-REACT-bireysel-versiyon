@@ -61,7 +61,7 @@ const Footer = () => {
             <Col lg={8} md={8} sm={12} xs={12}>
               <Title>{t("İletişim")}</Title>
               <Large to="/">{t("Herhangi bir sorunuz mu var?")}</Large>
-              <a href="mailto:contact@ikplus.com">
+              <a href="mailto:infoikplus@gmail.com">
                 <Chat>{t("Sohbete Başla")}</Chat>
               </a>
             </Col>

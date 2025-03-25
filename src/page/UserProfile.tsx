@@ -52,7 +52,7 @@ const UserProfile = () => {
       })
       .catch((err) => console.error("Profil yüklenirken hata oluştu:", err));
 
-    
+
     fetch("http://localhost:9090/v1/dev/user/dashboard", {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
@@ -66,11 +66,11 @@ const UserProfile = () => {
         }
       })
 
-    
+
     fetch("http://localhost:9090/v1/dev/blood-types")
       .then((res) => res.json())
       .then((response) => {
-        
+
         setBloodTypes(response.data); // "data" içindeki diziye erişiyoruz
       })
       .catch((err) => console.error("Kan grupları yüklenirken hata oluştu:", err));
@@ -80,7 +80,7 @@ const UserProfile = () => {
       setEditableData({ ...editableData, [e.target.name]: e.target.value });
     }
   };
-  
+
   const renderSidebar = () => {
     if (!userRole || userRole === "VISITOR" || userRole === "WEBSITE_MEMBER") {
       return null; // Visitor ve Website Member için sidebar yok
@@ -156,7 +156,7 @@ const UserProfile = () => {
             <div className="user-card-header"></div>
             <div className="card-img-container">
               <img
-                src="https://picsum.photos/200/200"
+                src={userData?.userImageUrl || "https://picsum.photos/200/200"}
                 className="user-profile-img"
                 alt="Profil Resmi"
               />
@@ -164,7 +164,7 @@ const UserProfile = () => {
             <div className="card-body">
               <h5 className="welcome-title">Merhaba, {userData?.firstName}</h5>
               <p className="welcome-description">Hesabınız başarıyla oluşturuldu. Lütfen bilgilerinizi güncelleyin!</p>
-    
+
               <div className="recent-actions">
                 <h6>Son İşlemler</h6>
                 <ul>

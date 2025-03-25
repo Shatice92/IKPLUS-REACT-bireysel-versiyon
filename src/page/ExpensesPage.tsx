@@ -6,6 +6,7 @@ import { Spinner, Modal, Button, Form } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { IExpenses, IApiResponse } from '../model/ExpenseModels';
 import './ExpensesPage.css';
+import EmployeeSidebar from '../components/organisms/EmployeeSideBar';
 
 const API_BASE_URL = 'http://localhost:9090/v1/dev/employee/expenses';
 
@@ -294,13 +295,14 @@ const ExpensesPage = () => {
         setShowViewModal(true);
     };
 
+    const toggleSidebar = () => {
+        setSidebarCollapsed(!sidebarCollapsed);
+      };
+
     return (
         <div className="personal-management-container">
-            <ExpensesSideBar 
-                collapsed={sidebarCollapsed} 
-                onToggle={handleToggleSidebar} 
-            />
-            <main className={`main-content ${sidebarCollapsed ? 'content-expanded' : 'content-normal'}`}>
+            <EmployeeSidebar collapsed={sidebarCollapsed} onToggle={toggleSidebar} />
+            <main className={`main-content ${sidebarCollapsed ? 'expanded' : ''}`}>
                 {/* Header Bölümü */}
                 <div className="expenses-header">
                     <div className="header-left">

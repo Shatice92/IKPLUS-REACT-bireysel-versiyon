@@ -17,6 +17,7 @@ import {
     PointElement,
 } from 'chart.js'
 import { Sidebar } from '../components/organisms/Sidebar'
+import CompanyManagerSidebar from '../components/organisms/CompanyManagerSidebar'
 
 ChartJS.register(
     CategoryScale,
@@ -276,7 +277,7 @@ const EmployeeRow: React.FC<{
     );
 });
 
-// API yapılandırması
+
 const API = {
     BASE_URL: 'http://localhost:9090',
     VERSION: '/v1',
@@ -394,7 +395,7 @@ const API_ENDPOINTS = {
     }
 };
 
-// Kullanılacak Routes
+
 const ROUTES = {
     EMPLOYEES: {
         LIST: API_ENDPOINTS.COMPANY_MANAGER.EMPLOYEES + API_ENDPOINTS.CRUD.LIST,
@@ -445,7 +446,7 @@ const ROUTES = {
 
 // API yardımcı fonksiyonları
 const getAuthToken = () => {
-    return localStorage.getItem('authToken');
+    return sessionStorage.getItem('authToken');
 };
 
 const fetchWithAuth = async (url: string, options: any = {}) => {
@@ -1773,7 +1774,7 @@ function PersonalManagementPage() {
 
     return (
         <div className="personal-management-container">
-            <Sidebar collapsed={sidebarCollapsed} onToggle={toggleSidebar} />
+            <CompanyManagerSidebar collapsed={sidebarCollapsed} onToggle={toggleSidebar} />
             <main className={`main-content ${sidebarCollapsed ? 'expanded' : ''}`}>
                 {/* İstatistik Kartları */}
                 <div className="dashboard-stats">

@@ -24,11 +24,12 @@ export const useForm = (validate: { (values: IValues): IValues }) => {
 
   const handleSubmit = async (event: React.ChangeEvent<HTMLFormElement>) => {
     event.preventDefault();
+    console.log("Form Gönderildi, Mevcut Değerler:", formState.values);
     const values = formState.values;
     const errors = validate(values);
     setFormState((prevState) => ({ ...prevState, errors }));
 
-    const url = ""; // Fill in your API URL here
+    const url = "http://localhost:9090/v1/dev/contact/save"; 
 
     try {
       if (Object.values(errors).every((error) => error === "")) {
@@ -70,20 +71,17 @@ export const useForm = (validate: { (values: IValues): IValues }) => {
   const handleChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    event.persist();
     const { name, value } = event.target;
+  
     setFormState((prevState) => ({
       ...prevState,
       values: {
         ...prevState.values,
         [name]: value,
       },
-      errors: {
-        ...prevState.errors,
-        [name]: "",
-      },
     }));
   };
+  
 
   return {
     handleChange,

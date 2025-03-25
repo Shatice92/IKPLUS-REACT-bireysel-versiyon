@@ -1,216 +1,204 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { ICompanyManagerPermissions } from '../model/ICompanyManagerPermissions';
+import { IEmployee } from '../model/IEmployee';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './CompanyManagerPermissions.css';
 import CompanyManagerSidebar from '../components/organisms/CompanyManagerSidebar';
+import { leaveId, LeaveStatusLabels, leaveTypes } from "../model/IPermissions";
 
 const CompanyManagerPermissions: React.FC = () => {
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     const [companyManagerPermissionRequests, setCompanyManagerPermissionRequests] = useState<ICompanyManagerPermissions[]>([]);
     const [newRequest, setNewRequest] = useState({
-        employeeName: "",
+        employeeId: 0,
         startDate: "",
         endDate: "",
-        type: "",
+        leaveTypeId: "",
     });
-    const [editIndex, setEditIndex] = useState<number | null>(null);
+    const [employees, setEmployees] = useState<IEmployee[]>([]);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
-    const [employees, setEmployees] = useState([]);
     const navigate = useNavigate();
 
     useEffect(() => {
         const token = sessionStorage.getItem("token");
         if (!token) {
             navigate("/login");
+        } else {
+            fetchEmployees(); // Fetch employees based on companyId
         }
     }, [navigate]);
 
+    // Fetch employees by companyId
     const fetchEmployees = () => {
-        fetch("http://localhost:9090/v1/dev/company-manager/employees/list", {
+        const token = sessionStorage.getItem("token");
+        if (!token) {
+            setErrorMessage("Token bulunamadı, giriş yapmanız gerekiyor.");
+            return;
+        }
+
+        fetch("http://localhost:9090/v1/dev/company-manager/employees/get-by-companyId", {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
+                Authorization: `Bearer ${token}`,
             },
         })
-        .then((res) => res.json())
-        .then((data) => {
-            setEmployees(data); // Veriyi employees'e atıyoruz
-            setCompanyManagerPermissionRequests(data); // Veriyi permissionRequests'e atıyoruz
-        })
-        .catch((err) => {
-            setErrorMessage("Çalışanları çekerken hata oluştu.");
-        });
+            .then((res) => res.json())
+            .then((data) => {
+                if (data.success) {
+                    setEmployees(data.data);
+                } else {
+                    setErrorMessage("Çalışanlar alınırken hata oluştu.");
+                }
+            })
+            .catch((err) => {
+                setErrorMessage("Çalışanları çekerken hata oluştu.");
+            });
     };
 
-    useEffect(() => {
-        fetchEmployees();
-    }, []);
-
-    const updateEmployee = (id: number, updatedData: Record<string, any>) => {
-        fetch(`http://localhost:9090/v1/dev/company-manager/employees/update/{id}`, { // Düzeltilen URL
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${sessionStorage.getItem("token")}`,
-            },
-            body: JSON.stringify(updatedData),
-        })
-        .then((res) => res.json())
-        .then(() => {
-            fetchEmployees();  // Güncellenen çalışan verileri listelenir
-            setEditIndex(null);  // Edit işlemi tamamlandığında, düzenleme modundan çıkılır
-            setNewRequest({ employeeName: "", startDate: "", endDate: "", type: "" });  // Form sıfırlanır
-        })
-        .catch((err) => {
-            setErrorMessage("Çalışanı güncellerken hata oluştu.");
-            console.error("Çalışanı güncellerken hata oluştu:", err);
-        });
-    };
 
     const saveEmployee = (employeeData: Record<string, any>) => {
-        fetch("http://localhost:9090/v1/dev/company-manager/employees/save", {
+        const token = sessionStorage.getItem("token");
+        if (!token) {
+            setErrorMessage("Token bulunamadı, giriş yapmanız gerekiyor.");
+            return;
+        }
+
+        const leaveData = {
+            employeeId: employeeData.employeeId,
+            leaveTypeId: leaveId[employeeData.leaveTypeId as keyof typeof leaveId], 
+            startDate: employeeData.startDate,
+            endDate: employeeData.endDate,
+        };
+
+        fetch("http://localhost:9090/v1/dev/company-manager/leaves/save", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+                Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify(employeeData),
+            body: JSON.stringify(leaveData),
         })
-        .then((res) => res.json())
-        .then(() => {
-            fetchEmployees();  // Yeni çalışan eklendikten sonra çalışanlar listesi güncelleniyor
-            setNewRequest({ employeeName: "", startDate: "", endDate: "", type: "" });  // Formu temizleme
-        })
-        .catch((err) => {
-            setErrorMessage("Çalışan kaydedilirken hata oluştu.");
-            console.error("Çalışan kaydedilirken hata oluştu:", err);
-        });
+            .then((res) => res.json())
+            .then((data) => {
+                if (data.success) {
+                    setNewRequest({ employeeId: 0, startDate: "", endDate: "", leaveTypeId: "" });
+                    setCompanyManagerPermissionRequests((prevRequests) => [
+                        ...prevRequests,
+                        data.data, // Yeni izin talebini ekliyoruz
+                    ]);
+                } else {
+                    setErrorMessage("İzin talebi kaydedilirken hata oluştu.");
+                }
+            })
+            .catch((err) => {
+                setErrorMessage("İzin talebi kaydedilirken bir hata oluştu.");
+            });
     };
 
-    const deleteEmployee = (id: number) => {
-        fetch(`http://localhost:9090/v1/dev/company-manager/employees/delete/{id}`, {  // Düzeltilen URL
-            method: "DELETE",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${sessionStorage.getItem("token")}`,
-            },
-        })
-        .then((res) => res.json())
-        .then(() => fetchEmployees())
-        .catch((err) => {
-            setErrorMessage("Çalışanı silerken hata oluştu.");
-            console.error("Çalışanı silerken hata oluştu:", err);
-        });
-    };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const value = e.target.value;
         setNewRequest({
             ...newRequest,
-            [e.target.name]: e.target.value,
+            [e.target.name]: e.target.name === "leaveTypeId" ? parseInt(value) : value,
         });
     };
 
-    const toggleSidebar = () => {
-        setSidebarCollapsed(!sidebarCollapsed);
-      };
+    // Handle employee selection change
+    const handleEmployeeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const selectedEmployeeId = parseInt(e.target.value);
+        setNewRequest({
+            ...newRequest,
+            employeeId: selectedEmployeeId,
+        });
+    };
 
     return (
         <div className={`deneme-container ${sidebarCollapsed ? 'collapsed' : ''}`}>
-            <CompanyManagerSidebar collapsed={sidebarCollapsed} onToggle={toggleSidebar} />
+            <CompanyManagerSidebar collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} />
             <main className={`main-content ${sidebarCollapsed ? 'expanded' : ''}`}>
-            <div className="permissions-container">
-                <h2>İzin Talepleri</h2>
-                {errorMessage && <p className="error-message">{errorMessage}</p>}
-                
-                <div className="new-request-form">
-                    <h3>{editIndex !== null ? "İzni Güncelle" : "Yeni İzin Talebi Ekle"}</h3>
-                    <input
-                        type="text"
-                        name="employeeName"
-                        value={newRequest.employeeName}
-                        placeholder="Çalışan Adı"
-                        onChange={handleInputChange}
-                    />
-                    <input
-                        type="date"
-                        name="startDate"
-                        value={newRequest.startDate}
-                        onChange={handleInputChange}
-                    />
-                    <input
-                        type="date"
-                        name="endDate"
-                        value={newRequest.endDate}
-                        onChange={handleInputChange}
-                    />
-                    <select
-                        name="type"
-                        value={newRequest.type}
-                        onChange={handleInputChange}
-                    >
-                        <option value="">İzin Türü Seçin</option>
-                        <option value="Annual Leave">Yıllık İzin</option>
-                        <option value="Sick Leave">Sağlık İzni</option>
-                        <option value="Maternity Leave">Kadın Doğum İzni</option>
-                        <option value="Paternity Leave">Erkek Doğum İzni</option>
-                        <option value="Marriage Leave">Evlilik İzni</option>
-                        <option value="Bereavement Leave">Vefat İzni</option>
-                        <option value="Compensatory Leave">Fazla Mesai İzni</option>
-                        <option value="Unpaid Leave">Ücretsiz İzin</option>
-                        <option value="Study Leave">Mesleki Eğitim İzni</option>
-                        <option value="Public Holiday">Ulusal İzin</option>
-                        <option value="Religious Holiday">Dini Bayram İzni</option>
-                        <option value="Emergency Leave">Acil Durum İzni</option>
-                        <option value="Voiting Leave">Seçim İzni</option>
-                        <option value="Military Leave">Askerlik İzni</option>
-                        <option value="Medical Leave">Tedavi İzni</option>
-                        <option value="Adoption Leave">Evlat Edinme İzni</option>
-                        <option value="Special Occasion Leave">Özel Gün İzni</option>
-                        <option value="Quarantine Leave">Karantina İzni</option>
-                        <option value="Work From Home">Evden Çalışma İzni</option>
-                    </select>
+                <div className="permissions-container">
+                    <p className="header-subtitle">Şirket Yöneticisi olarak çalışanlarınıza izin atayabilirsiniz.</p>
 
-                    {editIndex !== null ? (
-                        <button
-                            onClick={() => {
-                                if (editIndex !== null) {
-                                    const selectedRequest = companyManagerPermissionRequests[editIndex]; // Edit edilen izin talebini alıyoruz
-                                    if (selectedRequest) {
-                                        updateEmployee(selectedRequest.id, newRequest); // İzin talebini güncelliyoruz
-                                    }
-                                }
-                            }}
+
+                    <div className="new-request-form">
+                        <p className="header-subtitle">Yeni İzin Talebi Ekle</p>
+                        <select
+                            name="employeeId"
+                            value={newRequest.employeeId}
+                            onChange={handleEmployeeChange} // Handle employee change
                         >
-                            Güncelle
-                        </button>
-                    ) : (
-                        <button onClick={() => saveEmployee(newRequest)}>Ekle</button>
-                    )}
-                </div>
+                            <option value={0}>Çalışan Seçin</option>
+                            {employees.map((employee) => (
+                                <option key={employee.id} value={employee.id}>
+                                    {employee.firstName} {employee.lastName}
+                                </option>
+                            ))}
+                        </select>
 
-                <h3>İzin Talepleri</h3>
-                <ul>
-                {companyManagerPermissionRequests.map((request: ICompanyManagerPermissions, index: number) => (
-                <li key={request.id}>
-                {request.employeeName} - {request.startDate} - {request.endDate} - {request.type}
-                <button onClick={() => deleteEmployee(request.id)}>Sil</button>
-                <button onClick={() => {
-                setEditIndex(index);
-                setNewRequest({
-                    employeeName: request.employeeName,
-                    startDate: request.startDate,
-                    endDate: request.endDate,
-                    type: request.type,
-                });
-                }}>
-                Düzenle
-            </button>
-        </li>
-    ))}
-</ul>
-            </div>
+                        <input
+                            type="date"
+                            name="startDate"
+                            value={newRequest.startDate}
+                            onChange={handleInputChange}
+                        />
+                        <input
+                            type="date"
+                            name="endDate"
+                            value={newRequest.endDate}
+                            onChange={handleInputChange}
+                        />
+                        <select
+                            name="leaveTypeId"
+                            value={newRequest.leaveTypeId}
+                            onChange={handleInputChange}
+                        >
+                            <option value="">İzin Türü Seçin</option>
+                            {Object.keys(leaveTypes).map((key) => (
+                                <option key={key} value={key}>
+                                    {leaveTypes[key as keyof typeof leaveTypes]}
+                                </option>
+                            ))}
+                        </select>
+
+                        <button onClick={() => saveEmployee(newRequest)}>Ekle</button>
+                    </div>
+
+                    <p className="header-subtitle">İzin Talepleri</p>
+                    <table className="table">
+                        <thead>
+                            <tr>
+                                <th>Çalışan Adı</th>
+                                <th>Başlangıç Tarihi</th>
+                                <th>Bitiş Tarihi</th>
+                                
+                                <th>Durum</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {companyManagerPermissionRequests.length > 0 ? (
+                                companyManagerPermissionRequests.map((request) => (
+                                    <tr key={request.id}>
+                                        <td>
+                                            {employees.find((employee) => employee.id === request.employeeId)?.firstName}{" "}
+                                            {employees.find((employee) => employee.id === request.employeeId)?.lastName}
+                                        </td>
+                                        <td>{request.startDate}</td>
+                                        <td>{request.endDate}</td>
+                                        <td>{LeaveStatusLabels[request.status] ?? "Bilinmeyen Durum"}</td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan={5}>İzin talebi bulunamadı.</td>
+                                </tr>
+                            )}
+                        </tbody>
+
+                    </table>
+                </div>
             </main>
         </div>
     );

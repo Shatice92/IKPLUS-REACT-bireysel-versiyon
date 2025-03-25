@@ -53,18 +53,6 @@ const CompanyManagerSidebar: React.FC<SidebarProps> = ({ collapsed, onToggle }) 
 
                 <li className="menu-label">Finans</li>
                 <li>
-                    <a onClick={() => handleNavigation("/companymanager-salaries")}>
-                        <i className="fas fa-money-bill-wave"></i>
-                        <span>Maaş Yönetimi</span>
-                    </a>
-                </li>
-                <li>
-                    <a onClick={() => handleNavigation("/companymanager-bonuses")}>
-                        <i className="fas fa-gift"></i>
-                        <span>Prim Yönetimi</span>
-                    </a>
-                </li>
-                <li>
                     <a onClick={() => handleNavigation("/companymanager-expenses")}>
                         <i className="fas fa-receipt"></i>
                         <span>Harcama Yönetimi</span>
@@ -72,12 +60,7 @@ const CompanyManagerSidebar: React.FC<SidebarProps> = ({ collapsed, onToggle }) 
                 </li>
 
                 <li className="menu-label">Diğer</li>
-                <li>
-                    <a onClick={() => handleNavigation("/companymanager-reports")}>
-                        <i className="fas fa-chart-line"></i>
-                        <span>Raporlar</span>
-                    </a>
-                </li>
+            
                 <li>
                     <a onClick={() => handleNavigation("/profile")}>
                         <i className="fas fa-user-cog"></i>

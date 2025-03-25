@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import './AssetsTable.css'
-import { IAssets } from '../../model/IAssets';
+import { AssetStatusLabels, IAssets, AssetStatus } from '../../model/IAssets';
 
 function EmployeeAssetsTable() {
   const [assets, setAssets] = useState<IAssets[]>([]);
   const [selectedAsset, setSelectedAsset] = useState<IAssets | null>(null);
   const [note, setNote] = useState("");
   const [errorMessage, setErrorMessage] = useState<string>("");
-
 
   useEffect(() => {
     const token = sessionStorage.getItem('token');
@@ -62,9 +61,13 @@ function EmployeeAssetsTable() {
           }
           return response.json();
         })
-        .then(data => {
+        .then(() => {
           alert("Zimmet onaylandı!");
-          setAssets((prev) => prev.filter((asset) => asset.id !== assetId)); // Onaylananı listeden çıkar
+          setAssets((prev) =>
+            prev.map((asset) =>
+              asset.id === assetId ? { ...asset, status: AssetStatus.ACTIVE } : asset
+            )
+          );
         })
         .catch((err) => {
           console.error("Onaylama hatası:", err);
@@ -72,7 +75,6 @@ function EmployeeAssetsTable() {
         });
     }
   };
-
 
   const handleReject = (assetId: number) => {
     const token = sessionStorage.getItem('token');
@@ -93,7 +95,7 @@ function EmployeeAssetsTable() {
           }
           return response.json();
         })
-        .then(data => {
+        .then(() => {
           alert("Reddetme işlemi tamamlandı!");
           setAssets((prev) => prev.filter((asset) => asset.id !== assetId));
         })
@@ -106,7 +108,10 @@ function EmployeeAssetsTable() {
   return (
     <div className="container">
       <div className="table-wrapper">
-      <h2 className="content-title">Personel Zimmet Yönetimi</h2>
+        <div className="header-left">
+          <h1>Personel Zimmet Yönetimi</h1>
+          <p className="header-subtitle">Atanmış tüm zimmetleri takip edin,işleyin ve onaylayın.</p>
+        </div>
         <table className="table table-striped table-hover">
           <thead>
             <tr>
@@ -115,7 +120,7 @@ function EmployeeAssetsTable() {
               <th>Atanma Tarihi</th>
               <th>Tür</th>
               <th>Durum</th>
-              <th>Atayan Yönetici Id</th>
+
               <th>İşlemler</th>
             </tr>
           </thead>
@@ -127,8 +132,8 @@ function EmployeeAssetsTable() {
                   <td>{asset.serialNumber}</td>
                   <td>{new Date(asset.assignedDate).toLocaleDateString()}</td>
                   <td>{asset.assetType}</td>
-                  <td>{asset.status}</td>
-                  <td>{asset.companyManagerId}</td>
+                  <td>{AssetStatusLabels[asset.status]}</td>
+
                   <td>
                     <button onClick={() => handleApprove(asset.id)} className="approve-btn">
                       Kabul Et
@@ -150,7 +155,5 @@ function EmployeeAssetsTable() {
     </div>
   );
 };
-
-
 
 export default EmployeeAssetsTable;

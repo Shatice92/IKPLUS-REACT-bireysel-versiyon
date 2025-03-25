@@ -18,3 +18,12 @@ export enum AssetStatus {
     INACTIVE = "INACTIVE",
     REFUND="REFUND"
   }
+
+
+
+  
+export const AssetStatusLabels: Record<AssetStatus, string> = {
+    [AssetStatus.ACTIVE]: "Aktif",
+    [AssetStatus.INACTIVE]: "Pasif",
+    [AssetStatus.REFUND]: "İade Edildi",
+};

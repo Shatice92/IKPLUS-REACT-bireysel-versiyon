@@ -38,7 +38,7 @@ const Contact = ({ title, content, id, t }: ContactProps) => {
                 <InputField>
                   <Input
                     type="text"
-                    name="Ad"
+                    name="name"
                     placeholder={t("Adınız")}
                     value={values.name || ""}
                     onChange={handleChange}
@@ -63,7 +63,7 @@ const Contact = ({ title, content, id, t }: ContactProps) => {
                   <TextArea
                     placeholder={t("Mesajınız")}
                     value={values.message || ""}
-                    name="mesaj"
+                    name="message"
                     onChange={handleChange}
                   />
                   <ValidationType type="message" />

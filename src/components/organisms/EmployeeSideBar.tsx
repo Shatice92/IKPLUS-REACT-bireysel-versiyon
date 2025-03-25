@@ -39,9 +39,9 @@ const EmployeeSidebar: React.FC<SidebarProps> = ({ collapsed, onToggle }) => {
           </a>
         </li>
         <li>
-          <a onClick={() => onNavigate("/employee-shifts")}>
+          <a onClick={() => onNavigate("/employee-shiftsandbreaks")}>
             <i className="fas fa-clock"></i>
-            <span>Vardiya Yönetimi</span>
+            <span>Vardiya ve Mola Yönetimi</span>
           </a>
         </li>
         <li>

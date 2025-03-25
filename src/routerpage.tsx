@@ -21,6 +21,11 @@ import AdminCompanyManagement from "./page/AdminCompanyManagement";
 import Notifications from "./page/Notifications";
 import PersonalManagementPage from "./page/PersonalManagementPage";
 import ExpensesPage from "./page/ExpensesPage";
+import Comments from "./page/Comments";
+import EmployeeShiftAndBreakManagement from "./page/EmployeeShiftAndBreakManagement";
+import AdminDefinitions from "./page/AdminDefinitions";
+import CompanyManagerExpenses from "./page/CompanyManagerExpenses";
+import CompanyManagerComments from "./page/CompanyManagerComments";
 
 
 
@@ -71,7 +76,6 @@ const RouterPage = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/reset-password" element={<ForgotPassword />} />
-          <Route path="/assets" element={<AssetsTable />} />
           <Route path="/employee-assets" element={<EmployeeAssets />} />
           <Route path="/companymanager-assets" element={<CompanyManagerAssetManagement />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -80,8 +84,13 @@ const RouterPage = () => {
           <Route path="/company-management" element={<AdminCompanyManagement />} />
           <Route path="/companymanager-shifts" element={<ShiftManagement />} />
           <Route path="/employee-leaves" element={<Permissions />} />
-          <Route path="/personal" element={<PersonalManagementPage />} />
+          <Route path="/companymanager-personal-management" element={<PersonalManagementPage />} />
           <Route path="/employee-expenses" element={<ExpensesPage />} />
+          <Route path="/comments" element={<Comments />} /> 
+          <Route path="/employee-shiftsandbreaks" element={<EmployeeShiftAndBreakManagement />} /> 
+          <Route path="/definition-management" element={<AdminDefinitions />} />
+          <Route path="/companymanager-expenses" element={<CompanyManagerExpenses />} />
+          <Route path="/companymanager-comments" element={<CompanyManagerComments />} />
           <Route
             path="/profile"
             element={

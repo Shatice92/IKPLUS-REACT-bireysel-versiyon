@@ -1,10 +1,8 @@
+import React, { useState } from 'react'
+import EmployeeSidebar from '../components/organisms/EmployeeSideBar';
+import EmployeeShiftAndBreakTable from '../components/organisms/EmployeeShiftAndBreakTable';
 
-import EmployeeSidebar from "../components/organisms/EmployeeSideBar";
-import EmployeeAssetsTable from "../components/organisms/EmployeeAssetsTable";
-import { useState } from "react";
-
-
-const EmployeeAssets = () => {
+function EmployeeShiftAndBreakManagement() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const toggleSidebar = () => {
@@ -16,12 +14,12 @@ const EmployeeAssets = () => {
       <EmployeeSidebar collapsed={sidebarCollapsed} onToggle={toggleSidebar} />
       <main className={`main-content ${sidebarCollapsed ? 'expanded' : ''}`}>
         <div className="content">
-
-          <EmployeeAssetsTable />
+          
+          <EmployeeShiftAndBreakTable />
         </div>
       </main>
     </div>
   );
 };
 
-export default EmployeeAssets;
+export default EmployeeShiftAndBreakManagement

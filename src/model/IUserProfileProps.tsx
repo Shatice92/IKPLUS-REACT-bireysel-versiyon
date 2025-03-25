@@ -14,6 +14,7 @@ export interface IUserProfileProps {
       nationality: string;
       educationLevel: UserEducationLevel; // Enum olarak tanımlandı
       status: UserStatus; // Enum olarak tanımlandı
+      userImageUrl: string;
     };
   }
   

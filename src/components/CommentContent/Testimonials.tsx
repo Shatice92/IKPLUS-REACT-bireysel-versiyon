@@ -37,7 +37,9 @@ const Testimonials = () => {
       <Col span={24}>
         <Slide direction="up" triggerOnce>
           <h2>{CommentContent.title}</h2>
-          <p>{CommentContent.text}</p>
+          <p>{CommentContent.text}
+          <a href="/comments">Hakkımızda diğer yorumları inceleyin</a>
+          </p>
           <TestimonialsContainer>
             {CommentContent.comments.map((comment, index) => (
               <CommentItem key={index}>
@@ -46,7 +48,9 @@ const Testimonials = () => {
                   <p><strong>{comment.comment}</strong></p>
                   <small>⭐ {comment.rating} - {new Date(comment.createdAt).toLocaleDateString()}</small>
                 </div>
+               
               </CommentItem>
+            
             ))}
           </TestimonialsContainer>
         </Slide>

@@ -5,6 +5,7 @@ import CompanyManagerSidebar from "../components/organisms/CompanyManagerSidebar
 import EmployeeSideBar from "../components/organisms/EmployeeSideBar";
 import { useNavigate } from "react-router";
 import { INotifications } from "../model/INotifications";
+import swal from "sweetalert";
 
 type RoleName = "ADMIN" | "COMPANY_MANAGER" | "EMPLOYEE" | "VISITOR" | "WEBSITE_MEMBER";
 
@@ -13,7 +14,7 @@ function Notifications() {
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     const [userRole, setUserRole] = useState<RoleName | null>(null);
     const [notifications, setNotifications] = useState<INotifications[]>([]);
-    const [searchTerm, setSearchTerm] = useState("");
+
 
     useEffect(() => {
         const token = sessionStorage.getItem("token");
@@ -80,23 +81,10 @@ function Notifications() {
         }
     };
 
-    const getNotificationClass = (type: string) => {
-        switch (type) {
-            case "success":
-                return "Message--green";
-            case "warning":
-                return "Message--orange";
-            case "error":
-                return "Message--red";
-            default:
-                return "Message--orange";
-        }
-    };
-
     const markAsRead = (id: number) => {
         const token = sessionStorage.getItem("token");
         if (!token) return;
-
+    
         fetch(`http://localhost:9090/v1/dev/notification/mark-as-read/${id}`, {
             method: "PUT",
             headers: {
@@ -106,18 +94,21 @@ function Notifications() {
         })
             .then((res) => res.json())
             .then((data) => {
-                if (data.code === 200) {
+                // Yanıtın başarı durumunu kontrol et
+                if (data.code === 200 && data.data === true) {
+                    swal("Başarılı", "Bildirim okundu olarak işaretlendi!", "success");
                     setNotifications((prev) =>
                         prev.map((notification) =>
                             notification.id === id ? { ...notification, isRead: true } : notification
                         )
                     );
                 } else {
-                    console.error("Bildirimi okundu olarak işaretleme başarısız:", data);
+                    console.error("Bildirimi okundu olarak işaretleme başarısız:", data.message || data);
                 }
             })
             .catch((err) => console.error("Okundu API hatası:", err));
     };
+    
     const handleDelete = (id: number) => {
         const token = sessionStorage.getItem("token");
         if (!token) return;
@@ -131,6 +122,7 @@ function Notifications() {
             .then((res) => res.json())
             .then((data) => {
                 if (data.code === 200) {
+                    swal("Başarılı", "Bildirim başarı ile silindi!", "success");
                     setNotifications((prev) => prev.filter((notification) => notification.id !== id));
                 } else {
                     console.error("Bildirimi silme başarısız:", data);
@@ -139,7 +131,6 @@ function Notifications() {
             .catch((err) => console.error("Silme API hatası:", err));
     };
 
-
     return (
         <div className="deneme-container">
             {renderSidebar()}
@@ -147,14 +138,12 @@ function Notifications() {
             <div className={`content-container ${sidebarCollapsed ? "expanded" : ""}`}>
                 <h2 className="text-2xl font-bold mb-4">Bildirimler</h2>
 
-
-
                 <div className="notifications-list">
                     {notifications.length > 0 ? (
                         notifications.map((notification) => (
                             <div
                                 key={notification.id}
-                                className={`Message ${getNotificationClass(notification.notificationType)} ${notification.isRead ? "Message--read" : ""}`}
+                                className={`Message ${notification.isRead ? "Message--read" : "Message--unread"}`}
                             >
                                 <div className="Message-icon">
                                     {notification.notificationType === "success" && <i className="fa fa-check"></i>}
